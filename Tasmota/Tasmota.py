@@ -8,6 +8,7 @@ class Tasmota:
     def __init__(self, ipv4):
         self.ipv4 = ipv4
         self.url = f'http://{self.ipv4}/'
+        self.stream_open = False
 
     def _get_from_xpath(self, x):
         r = requests.get(self.url + '')
@@ -26,3 +27,9 @@ class Tasmota:
     def set_output(self, number, state):
         r = requests.get(self.url + f'cm?cmnd=Power{number}%20{state}')
         return r.content
+
+    def get_stream_url(self):
+        if not self.stream_open:
+            r = requests.get(self.url)
+            self.stream_open = True
+        return f'http://{self.ipv4}:81/stream'
