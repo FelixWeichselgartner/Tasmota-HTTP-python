@@ -1,7 +1,9 @@
 # one Tasmota device
+# Doc: https://tasmota.github.io/docs/Commands/#management
 
 import requests
 from lxml import html
+import json
 
 
 class Tasmota:
@@ -33,3 +35,18 @@ class Tasmota:
             r = requests.get(self.url)
             self.stream_open = True
         return f'http://{self.ipv4}:81/stream'
+
+    def get_power_monitoring_attribute(self, attribute):
+        """
+        possible attributes are:
+        Total, Yesterday, Today, Power, ApparentPower, ReactivePower, Factor, Voltage, Current
+        """
+        
+        if 'Monitoring' in self.get_name():
+            r = requests.get(self.url + f'cm?cmnd=Status%208')
+            text = str(r.content)
+            j = json.loads(text[2:-1])
+            return j['StatusSNS']['ENERGY'][attribute]
+        else:
+            print('power monitoring not supported for this device')
+            return None
